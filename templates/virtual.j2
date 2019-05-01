@@ -1,1 +1,2 @@
 /.+@localhost/ {{postfix_local_user_relay_address}}
+/.+@{{ inventory_hostname | regex_escape }}/ {{postfix_local_user_relay_address}}
