@@ -101,3 +101,7 @@ maximal_queue_lifetime = {{maximal_queue_lifetime}}
 maximal_backoff_time = {{maximal_backoff_time}}
 minimal_backoff_time = {{minimal_backoff_time}}
 queue_run_delay = {{queue_run_delay}}
+
+{% if postfix_compatibility_level %}
+compatibility_level = {{ postfix_compatibility_level }}
+{% endif %}
