@@ -1,13 +1,34 @@
 ---
 
 - name: postfix restart
-  service: name=postfix state=restarted
-  notify: postfix send test mail
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
+  notify: postfix restarted
 
 - name: postfix opendkim restart
-  service: name=opendkim state=restarted
-  notify: postfix send test mail
+  ansible.builtin.service:
+    name: opendkim
+    state: restarted
+  notify: postfix restarted
 
-- name: "postfix send test mail"
-  shell: echo "Test mail from new/updated postfix at" `hostname` | mail {{postfix_send_test_mail_to}} -s "Test SMTP `hostname`"
+- name: Postfix send test mail
+  listen: postfix restarted
+  ansible.builtin.shell: |
+      set -o pipefail
+      echo "Test mail from new/updated postfix at" `hostname` | mail {{ postfix_send_test_mail_to }} -s "Test SMTP `hostname`"
+  args:
+    executable: /bin/bash
+  changed_when: true
   when: postfix_send_test_mail_to != ""
+
+- name: Postfix send test relay mail
+  listen: postfix restarted
+  ansible.builtin.shell: |
+      set -o pipefail
+      echo "Test mail from new/updated postfix at" $(hostname) | mail {{ item }} -s "Test SMTP $(hostname), original to: {{ item }}"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  loop: "{{ postfix_send_test_relay_mail_to_list }}"
+  when: postfix_send_test_relay_mail_to_list
